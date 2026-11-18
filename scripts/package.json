@@ -1,0 +1,10 @@
+{
+  "name": "financial-agent-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Конвейеры «Финансового агента»: чтение выгрузок, генерация демо-данных, верификация артефактов",
+  "license": "MIT",
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}
