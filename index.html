@@ -45,18 +45,54 @@
       <img src="screens/01-artefact-full.png" alt="Перечень неоплаченных заявок (демо)">
     </div>
     <div class="card">
-      <h2>2. Проверка каждого артефакта</h2>
-      <p>Сборка завершается контрольными равенствами (COM) и независимым верификатором (SheetJS): Σ колонок дат = ОБЩИЙ ИТОГ = контрольные суммы. Журнал проверки прикладывается к каждому прогону.</p>
-      <p><a href="demo-output/verification-report.md">Журнал верификации демо-прогона →</a></p>
+      <h2>2. Каждый файл сам доказывает свою правильность</h2>
+      <p>После сборки работают два независимых контролёра: (1) сборщик перед сохранением сверяет
+      собственные контрольные суммы и не записывает файл при расхождении; (2) отдельный скрипт
+      открывает готовый Excel заново и проверяет его «глазами со стороны» — суммы всех колонок,
+      итоговые формулы, фильтры. Результат проверки хранится рядом с файлом.</p>
+      <p><a href="demo-output/verification-report.md">Пример журнала проверки →</a></p>
       <img src="screens/02-artefact-header.png" alt="Шапка перечня с формулами">
     </div>
     <div class="card">
-      <h2>3. Дашборд руководителя</h2>
+      <h2>3. Ежемесячный цикл: выгрузка 1С → разбивка по ЦФО → БДР</h2>
+      <p>Раз в месяц конвейер берёт журнал проводок 1С и раскладывает его на статьи и подразделения,
+      сверяя каждую сумму: расхождение раскладки с журналом — ноль, всё нераспределённое честно
+      попадает в лист «Требует решения».</p>
+      <svg viewBox="0 0 560 190" style="width:100%;display:block" role="img" aria-label="Схема: выгрузка 1С → разбивка по ЦФО → БДР">
+        <g font-family="Segoe UI, sans-serif" font-size="11">
+          <rect x="6" y="30" width="128" height="52" rx="8" fill="#eef4fc" stroke="#2a78d6"/>
+          <text x="70" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">Выгрузка 1С</text>
+          <text x="70" y="66" text-anchor="middle" fill="#44423e">журнал проводок</text>
+          <text x="70" y="79" text-anchor="middle" fill="#7a786f">затраты, ФОТ, аморт.</text>
+          <rect x="166" y="30" width="140" height="52" rx="8" fill="#e8f9f1" stroke="#00a86b"/>
+          <text x="236" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">Правила разбивки</text>
+          <text x="236" y="66" text-anchor="middle" fill="#44423e">статья ↔ счёт/контрагент</text>
+          <text x="236" y="79" text-anchor="middle" fill="#7a786f"> подразделение → ЦФО</text>
+          <rect x="338" y="30" width="134" height="52" rx="8" fill="#fdf2ec" stroke="#f05a28"/>
+          <text x="405" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">Матрица БДР</text>
+          <text x="405" y="66" text-anchor="middle" fill="#44423e">статей × ЦФО</text>
+          <text x="405" y="79" text-anchor="middle" fill="#7a786f">итоги с формулами</text>
+          <line x1="134" y1="56" x2="164" y2="56" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
+          <line x1="306" y1="56" x2="336" y2="56" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
+          <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#52514e"/></marker></defs>
+          <rect x="60" y="118" width="196" height="46" rx="8" fill="#fff" stroke="#d6d5d0"/>
+          <text x="158" y="138" text-anchor="middle" fill="#0b0b0b" font-weight="600">Регламентные переносы — исключены</text>
+          <text x="158" y="152" text-anchor="middle" fill="#7a786f">закрытие 23→20, распределение 25</text>
+          <rect x="300" y="118" width="196" height="46" rx="8" fill="#fff" stroke="#d6d5d0"/>
+          <text x="398" y="138" text-anchor="middle" fill="#0b0b0b" font-weight="600">Контроль: Σ матрицы = Σ журнала</text>
+          <text x="398" y="152" text-anchor="middle" fill="#009a3e" font-weight="700">расхождение 0,00 ₽</text>
+          <line x1="158" y1="118" x2="236" y2="84" stroke="#c9c8c2" stroke-width="1.4"/>
+          <line x1="398" y1="118" x2="405" y2="84" stroke="#c9c8c2" stroke-width="1.4"/>
+        </g>
+      </svg>
+      <p><a href="demo-output/bdr-verification-report.md">Журнал проверки БДР →</a></p>
+    </div>
+    <div class="card">
+      <h2>4. Дашборд руководителя</h2>
       <p>Деньги за день и бюджет года на одном экране; демо-версия на вымышленных данных открывается в браузере.</p>
       <p><a href="dashboard/index.html">Открыть демо-дашборд →</a></p>
       <img src="screens/05-dashboard.png" alt="Демо-дашборд">
     </div>
-  </div>
   <div class="card" style="margin-top:14px">
     <h2>Как запустить у себя</h2>
     <p>Windows + Node.js + Excel. Полный пошаговый разбор на синтетических данных —

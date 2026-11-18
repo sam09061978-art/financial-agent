@@ -73,8 +73,13 @@ ls demo-data/
 # 2) прогнать конвейер «утро» на синтетике
 cscript //nologo scripts/build-register-com.wsf demo/register-data.json demo-output/unpaid-payments-register.xlsx
 node scripts/verify-register.js   # независимая проверка артефакта
-# 3) открыть итог
+# 3) прогнать конвейер «месяц» (БДР) на синтетическом журнале
+node scripts/make-demo-bdr-data.js
+node scripts/build-bdr-demo.js
+# 4) открыть итоги
 start demo-output/unpaid-payments-register.xlsx
+start demo-output/bdr-stroykom-01.2027.xlsx
+start dashboard\index.html
 ```
 
 ## Как проверяется качество
