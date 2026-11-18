@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Демо-дашборд руководителя — ООО «СтройКом» (синтетические данные)</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --surface-2: #f4f3f0;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #8a8880;
+    --grid: #e5e4e0;
+    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a;
+    --good: #008300;
+    font-family: "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --surface-2: #222221;
+      --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8d84;
+      --grid: #3a3a38;
+      --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+      --good: #008300;
+    }
+  }
+  body { margin: 0; background: var(--surface-2); color: var(--text-primary); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 48px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 2px; }
+  .sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 20px; }
+  .tag { display: inline-block; font-size: 11px; border: 1px solid var(--text-muted); color: var(--text-secondary);
+         border-radius: 999px; padding: 1px 10px; margin-left: 8px; vertical-align: 2px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .tile { background: var(--surface-1); border: 1px solid var(--grid); border-radius: 10px; padding: 14px 16px; }
+  .tile .k { font-size: 12px; color: var(--text-secondary); }
+  .tile .v { font-size: 24px; font-weight: 650; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile .n { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .card { background: var(--surface-1); border: 1px solid var(--grid); border-radius: 10px; padding: 16px 18px 10px; margin-bottom: 18px; }
+  .card h2 { font-size: 14px; font-weight: 600; margin: 0 0 10px; color: var(--text-primary); }
+  .card .cap { font-size: 12px; color: var(--text-muted); margin: 2px 0 10px; }
+  svg text { fill: var(--text-secondary); font-size: 11px; }
+  svg text.v { fill: var(--text-primary); font-weight: 600; }
+  .bar { fill: var(--series-1); }
+  .bar:hover, .hbar-row:hover .hbar { opacity: 0.82; }
+  .hbar { fill: var(--series-1); }
+  .hbar.s2 { fill: var(--series-1); }
+  #tip { position: fixed; pointer-events: none; background: var(--text-primary); color: var(--surface-1);
+         font-size: 12px; padding: 5px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 5;
+         font-family: inherit; }
+  .day .bar.d1 { fill: var(--series-1); }
+  .foot { color: var(--text-muted); font-size: 11px; margin-top: -6px; }
+  table { border-collapse: collapse; font-size: 12px; margin-top: 8px; width: 100%; }
+  th, td { border-bottom: 1px solid var(--grid); padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-secondary); font-weight: 600; }
+  details summary { cursor: pointer; color: var(--text-secondary); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap viz-root" id="viz">
+  <h1>Демо-дашборд руководителя <span class="tag">синтетические данные ООО «СтройКом»</span></h1>
+  <div class="sub">Конвейер «Финансовый агент»: деньги за день + бюджет года в одном экране. Данные воображаемые, все проверки зелёные.</div>
+
+  <div class="tiles">
+    <div class="tile"><div class="k">Выручка 2027 (план)</div><div class="v">352,5 млн ₽</div><div class="n">12 месяцев</div></div>
+    <div class="tile"><div class="k">Валовая прибыль</div><div class="v">95,5 млн ₽</div><div class="n">27,1% от выручки</div></div>
+    <div class="tile"><div class="k">УР</div><div class="v">12,0 млн ₽</div><div class="n">3,4%</div></div>
+    <div class="tile"><div class="k">ПХД</div><div class="v">83,5 млн ₽</div><div class="n">прибыль от хоз. деятельности</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Выручка по месяцам 2027 (план)</h2>
+    <div class="cap">маш.-часы × ставка × численность, млн ₽ · наведите на столбец</div>
+    <svg id="rev" width="1040" height="220" role="img" aria-label="Столбчатая диаграмма выручки по месяцам"></svg>
+    <details><summary>Таблицей</summary><table id="revT"><thead><tr><th>Месяц</th><th>Выручка, млн ₽</th></tr></thead><tbody></tbody></table></details>
+  </div>
+
+  <div class="card">
+    <h2>План платежей на неделю (из перечня конвейера «утро»)</h2>
+    <div class="cap">итог перечня неоплаченных заявок демо-прогона 18.01.2027 · наведите на столбец</div>
+    <svg id="days" width="1040" height="170" role="img" aria-label="Столбчатая диаграмма плана платежей по дням"></svg>
+    <div class="foot">Перечень: 17 заявок · ОБЩИЙ ИТОГ 561 312,19 ₽ · независимая верификация пройдена</div>
+  </div>
+
+  <div class="card">
+    <h2>День 17.01.2027 — сверка выписки</h2>
+    <div class="cap">контрольные суммы ежедневного отчёта</div>
+    <table>
+      <thead><tr><th>Поток</th><th>Сумма, ₽</th></tr></thead>
+      <tbody>
+        <tr><td>Поступления (возврат депозита 5 000 000 + проценты 4 870 + оплата покупателя 36 999,99)</td><td>5 041 869,99</td></tr>
+        <tr><td>Списания (вклад 5 000 000 + поставщикам 43 880 + комиссия 70)</td><td>5 043 950,00</td></tr>
+        <tr><td>Контрольный итог файла</td><td>10 085 819,99</td></tr>
+        <tr><td><b>Расхождение (сверка статей)</b></td><td><b style="color: var(--good)">0,00 ✓</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div id="tip"></div>
+<script>
+const REV = [['янв',22.6],['фев',25.4],['мар',29.8],['апр',28.1],['май',31.5],['июн',34.2],['июл',33.0],['авг',29.6],['сен',32.4],['окт',30.8],['ноя',28.4],['дек',26.7]];
+const DAYS = [['18.01',191.98],['19.01',383.13],['20.01',1396.09],['23.01',383.11],['27.01',98.56]];
+// значения в тыс. ₽ × 0.01 для масштаба графика дней (млн ₽)
+const DAYS_M = DAYS.map(d=>[d[0], d[1]/1000]);
+function bars(svgId, data, fmt, yMax) {
+  const svg = document.getElementById(svgId);
+  const W = +svg.getAttribute('width'), H = +svg.getAttribute('height');
+  const padL = 8, padB = 22, padT = 14, gap = 8;
+  const innerW = W - padL*2, plotH = H - padT - padB;
+  const max = yMax || Math.ceil(Math.max(...data.map(d=>d[1]))/10)*10*1.05;
+  const bw = (innerW - gap*(data.length-1)) / data.length;
+  const NS = 'http://www.w3.org/2000/svg';
+  // грид: 4 горизонтальные линии
+  for (let i=1;i<=3;i++){
+    const y = padT + plotH*(1 - i/4);
+    const ln = document.createElementNS(NS,'line');
+    ln.setAttribute('x1',padL); ln.setAttribute('x2',W-padL);
+    ln.setAttribute('y1',y); ln.setAttribute('y2',y);
+    ln.setAttribute('stroke','var(--grid)'); ln.setAttribute('stroke-width','1');
+    svg.appendChild(ln);
+  }
+  // ось-базовая линия
+  const ax = document.createElementNS(NS,'line');
+  ax.setAttribute('x1',padL); ax.setAttribute('x2',W-padL);
+  ax.setAttribute('y1',padT+plotH); ax.setAttribute('y2',padT+plotH);
+  ax.setAttribute('stroke','var(--grid)'); ax.setAttribute('stroke-width','1');
+  svg.appendChild(ax);
+  const tip = document.getElementById('tip');
+  // подпись макс
+  const maxI = data.findIndex(d=>d[1]===Math.max(...data.map(x=>x[1])));
+  data.forEach((d,i)=>{
+    const h = d[1]/max*plotH;
+    const x = padL + i*(bw+gap), y = padT+plotH-h;
+    const r = document.createElementNS(NS,'rect');
+    r.setAttribute('x',x); r.setAttribute('y',y); r.setAttribute('width',bw); r.setAttribute('height',Math.max(h,2));
+    r.setAttribute('rx','4'); r.setAttribute('class','bar');
+    r.addEventListener('mousemove',ev=>{ tip.style.opacity=1; tip.textContent = d[0]+': '+fmt(d[1]); tip.style.left=(ev.clientX+12)+'px'; tip.style.top=(ev.clientY-24)+'px'; });
+    r.addEventListener('mouseleave',()=>tip.style.opacity=0);
+    svg.appendChild(r);
+    const t1 = document.createElementNS(NS,'text');
+    t1.setAttribute('x',x+bw/2); t1.setAttribute('y',H-6); t1.setAttribute('text-anchor','middle'); t1.textContent = d[0];
+    svg.appendChild(t1);
+    if (i===maxI) { const tv=document.createElementNS(NS,'text'); tv.setAttribute('x',x+bw/2); tv.setAttribute('y',y-6); tv.setAttribute('text-anchor','middle'); tv.setAttribute('class','v'); tv.textContent=fmt(d[1]); svg.appendChild(tv); }
+    // таблица
+    if (svgId==='rev') { const tr=document.createElement('tr'); tr.innerHTML='<td>'+d[0]+'</td><td>'+fmt(d[1])+'</td>'; document.getElementById('revT').tBodies[0].appendChild(tr); }
+  });
+}
+const fM = v => v.toFixed(1)+' млн ₽';
+const fK = v => v.toLocaleString('ru-RU',{minimumFractionDigits:2, maximumFractionDigits:2})+' тыс ₽';
+bars('rev', REV, fM, 40);
+bars('days', DAYS_M, fK, 0.4);
+document.getElementById('days').closest('.card').querySelector('svg text,.bar').setAttribute('fill','var(--series-1)');
+</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<job id="build-register-com">
+<script language="JScript"><![CDATA[
+// Build the unpaid-payments register xlsx via Excel COM:
+// hierarchy (counterparty -> items) with row outline grouping, SUM formulas,
+// section totals, grand total, autofilter, freeze panes.
+// Usage: cscript //nologo build-register-2026-10-27-com.wsf <data.json> <out.xlsx>
+// Script text is ASCII-only; all Cyrillic strings live in the UTF-8 data file.
+
+var FSO0 = WSH.CreateObject('Scripting.FileSystemObject');
+var dataPath = FSO0.GetAbsolutePathName(WScript.Arguments(0));
+var outPath  = FSO0.GetAbsolutePathName(WScript.Arguments(1));
+
+// ---- read UTF-8 JSON via ADODB.Stream ----
+var stream = WSH.CreateObject('ADODB.Stream');
+stream.Type = 2; stream.Charset = 'utf-8'; stream.Open();
+stream.LoadFromFile(dataPath);
+var data = eval('(' + stream.ReadText() + ')');
+stream.Close();
+var LBL = data.labels;
+
+var e = data.expected;
+var DATES = data.dates;
+var D0 = 6;                            // first date column: F
+var LASTCOL = D0 + DATES.length;       // totals column (dynamic)
+var LCOL = 'ABCDEFGHIJKLMNOPQ'.charAt(LASTCOL - 1);  // last column letter
+
+// ---- self-check on source data before any Excel work ----
+function secSum(items) {
+  var s = 0;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].reghead) { s += secSum(items[i].items); continue; }
+    if (items[i].group) {
+      for (var g = 0; g < items[i].group.length; g++) s += items[i].group[g].amount;
+    } else s += items[i].amount;
+  }
+  return s;
+}
+var sums = [];
+var total = 0;
+for (var i = 0; i < data.sections.length; i++) {
+  sums.push(secSum(data.sections[i].items));
+  total += sums[i];
+}
+var bad = Math.abs(total - e.total) > 0.011;
+for (var si = 0; si < sums.length; si++) {
+  if (typeof e['section' + si] != 'undefined' && Math.abs(sums[si] - e['section' + si]) > 0.011) bad = true;
+}
+if (bad) {
+  WScript.Echo('DATA CHECK FAILED: ' + sums.join('|') + ' vs total ' + e.total);
+  WScript.Quit(1);
+}
+
+// ---- COL LETTERS helper (A..P) ----
+var LET = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+
+// ---- Excel ----
+var app = WSH.CreateObject('Excel.Application');
+app.Visible = false;
+app.DisplayAlerts = false;
+app.ScreenUpdating = false;
+
+var wb = app.Workbooks.Add();
+var sh = wb.Sheets(1);
+sh.Name = LBL.sheet;
+
+sh.Outline.SummaryRow = 0;   // summary row above the grouped rows
+sh.Outline.AutomaticStyles = false;
+
+sh.Cells(1, 1).Value = data.title;
+sh.Range('A1:' + LCOL + '1').Merge();
+sh.Range('A1:' + LCOL + '1').Font.Bold = true;
+
+// header row (row 3). Date-like strings must stay text -> format '@' first
+sh.Range('F3:' + LCOL + '3').NumberFormat = '@';
+var headers = data.headers.concat(DATES).concat([LBL.total]);
+for (var c = 0; c < headers.length; c++) sh.Cells(3, c + 1).Value = headers[c];
+sh.Range('A3:' + LCOL + '3').Font.Bold = true;
+
+var r = 4;
+var leafRowsAll = [];            // all leaf row numbers
+var totalRows = [];              // section total row numbers
+var num = 0;
+
+function putLeaf(row, item, indented) {
+  num++;
+  sh.Cells(row, 1).Value = num;
+  if (!item.noReg) sh.Cells(row, 2).Value = item.reg || '';
+  sh.Cells(row, 3).Value = item.status;
+  sh.Cells(row, 4).Value = item.agent || '';
+  sh.Cells(row, 5).Value = (indented ? '    ' : '') + item.cont;
+  if (item.plan === null) {           // no payment plan yet: amount lives in the total column only
+    sh.Cells(row, LASTCOL).Value = item.amount;
+  } else {
+    sh.Cells(row, D0 + item.plan).Value = item.amount;
+    sh.Cells(row, LASTCOL).Formula = '=SUM(' + LET[D0 - 1] + row + ':' + LET[LASTCOL - 2] + row + ')';
+  }
+}
+
+function sumFormulaText(L, rows) {
+  // consecutive rows -> '=SUM(F5:F6,F10:F11,F13)' (letter repeated for every range)
+  var parts = [], i = 0;
+  while (i < rows.length) {
+    var j = i;
+    while (j + 1 < rows.length && rows[j + 1] == rows[j] + 1) j++;
+    if (i == j) parts.push(L + rows[i]);
+    else parts.push(L + rows[i] + ':' + L + rows[j]);
+    i = j + 1;
+  }
+  return '=SUM(' + parts.join(',') + ')';
+}
+
+// render items (may contain reghead sub-blocks: желтая строка статуса -> реестры -> заявки)
+function renderItems(items) {
+  var leafRows = [];
+  for (var it = 0; it < items.length; it++) {
+    var item = items[it];
+    if (item.reghead) {
+      sh.Cells(r, 4).Value = item.reghead;
+      sh.Range('A' + r + ':' + LCOL + r).Font.Bold = true;   // register sub-header
+      sh.Range('A' + r + ':' + LCOL + r).Interior.Color = 13561798; // light green RGB(198,239,206)
+      r++;
+      var sub = renderItems(item.items);
+      for (var q = 0; q < sub.length; q++) leafRows.push(sub[q]);
+      continue;
+    }
+    if (item.group) {
+      var hdrRow = r;
+      sh.Cells(hdrRow, 2).Value = item.reg || '';
+      sh.Cells(hdrRow, 3).Value = item.status;
+      sh.Cells(hdrRow, 4).Value = item.agent;
+      sh.Cells(hdrRow, 5).Value = '[' + item.group.length + ' ' + LBL.groupItems + ']';
+      sh.Range('D' + hdrRow + ':' + LCOL + hdrRow).Font.Bold = true;
+      r++;
+      var firstChild = r;
+      for (var g = 0; g < item.group.length; g++) {
+        var child = {};
+        for (var k in item) child[k] = item[k];   // inherit status (reg shown on header)
+        child.agent = '';
+        child.cont = item.group[g].cont;
+        child.plan = item.group[g].plan;
+        child.amount = item.group[g].amount;
+        putLeaf(r, child, true);
+        r++;
+      }
+      var lastChild = r - 1;
+      // group header sums over children
+      for (var d = 0; d < DATES.length; d++) {
+        var L = LET[D0 - 1 + d];
+        sh.Cells(hdrRow, D0 + d).Formula = '=SUM(' + L + firstChild + ':' + L + lastChild + ')';
+      }
+      sh.Cells(hdrRow, LASTCOL).Formula = '=SUM(' + LET[D0 - 1] + hdrRow + ':' + LET[LASTCOL - 2] + hdrRow + ')';
+      sh.Rows(firstChild + ':' + lastChild).Group();
+      for (var cr = firstChild; cr <= lastChild; cr++) leafRows.push(cr);
+    } else {
+      putLeaf(r, item, false);
+      r++;
+      leafRows.push(r - 1);
+    }
+  }
+  return leafRows;
+}
+
+for (var s = 0; s < data.sections.length; s++) {
+  var sec = data.sections[s];
+  sh.Cells(r, 4).Value = sec.title;
+  sh.Range('A' + r + ':' + LCOL + r).Font.Bold = true;
+  sh.Range('A' + r + ':' + LCOL + r).Interior.Color = 65535;   // yellow status banner
+  r++;
+
+  var leafRows = renderItems(sec.items);
+
+  var tRow = r;
+  sh.Cells(tRow, 5).Value = LBL.section;
+  for (var d2 = 0; d2 < DATES.length; d2++) {
+    var L2 = LET[D0 - 1 + d2];
+    sh.Cells(tRow, D0 + d2).Formula = sumFormulaText(L2, leafRows);
+  }
+  sh.Cells(tRow, LASTCOL).Formula = sumFormulaText(LET[LASTCOL - 1], leafRows);
+  sh.Range('A' + tRow + ':' + LCOL + tRow).Font.Bold = true;
+  totalRows.push(tRow);
+  leafRowsAll = leafRowsAll.concat(leafRows);
+  r++;
+}
+
+// grand total row
+var gRow = r;
+sh.Cells(gRow, 5).Value = LBL.grand;
+var leafAllSorted = leafRowsAll.slice().sort(function(a, b) { return a - b; });
+for (var d3 = 0; d3 < DATES.length; d3++) {
+  var L3 = LET[D0 - 1 + d3];
+  sh.Cells(gRow, D0 + d3).Formula = sumFormulaText(L3, leafAllSorted);
+}
+sh.Cells(gRow, LASTCOL).Formula = sumFormulaText(LET[LASTCOL - 1], totalRows);
+sh.Range('A' + gRow + ':' + LCOL + gRow).Font.Bold = true;
+sh.Range('A' + gRow + ':' + LCOL + gRow).Interior.Color = 14277081; // light gray
+
+// formatting
+sh.Range('F4:' + LCOL + gRow).NumberFormat = '#,##0.00';
+sh.Columns('A').ColumnWidth = 4;
+sh.Columns('B').ColumnWidth = 17;
+sh.Columns('C').ColumnWidth = 15;
+sh.Columns('D').ColumnWidth = 28;
+sh.Columns('E').ColumnWidth = 58;
+for (var dc = 0; dc < DATES.length; dc++) sh.Columns(LET[D0 - 1 + dc]).ColumnWidth = 12;
+sh.Columns(LCOL).ColumnWidth = 13;
+
+sh.Range('A3:' + LCOL + gRow).AutoFilter();
+
+sh.Activate();
+try {
+  app.ActiveWindow.SplitRow = 3;
+  app.ActiveWindow.FreezePanes = true;
+} catch (eFreeze) {
+  app.ScreenUpdating = true;
+  app.Visible = true;
+  app.ActiveWindow.WindowState = -4137;   // xlMaximized: FreezePanes fails on minimized window
+  sh.Activate();
+  app.ActiveWindow.SplitRow = 3;
+  app.ActiveWindow.FreezePanes = true;
+}
+
+sh.Calculate();
+var check = sh.Cells(gRow, LASTCOL).Value;
+if (Math.abs(check - e.total) > 0.011) {
+  WScript.Echo('EXCEL CHECK FAILED: grand total ' + check + ' vs ' + e.total);
+  wb.Close(false);
+  app.Quit();
+  WScript.Quit(1);
+}
+
+wb.SaveAs(outPath, 51);   // xlsx
+wb.Close(false);
+app.Quit();
+app = null;
+
+WScript.Echo('OK ' + outPath);
+WScript.Echo('Total: ' + check + ' | sections: ' + sums.join(' | '));
+]]></script>
+</job>

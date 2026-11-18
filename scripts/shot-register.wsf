@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job id="shotRegister">
+<script language="JScript"><![CDATA[
+// Скриншот артефакта перечня: Range.CopyPicture → Chart.Paste → Export PNG.
+// Использование: cscript //nologo shot-register.wsf <книга.xlsx> <лист> <диапазон> <png-файл>
+var FSO = WSH.CreateObject("Scripting.FileSystemObject");
+var file = FSO.GetAbsolutePathName(WSH.Arguments(0));
+var sheet = WSH.Arguments(1);
+var rng = WSH.Arguments(2);
+var png = FSO.GetAbsolutePathName(WSH.Arguments(3));
+var Excel = null;
+try {
+  Excel = WSH.CreateObject("Excel.Application");
+  Excel.Visible = false; Excel.DisplayAlerts = false;
+  var wb = Excel.Workbooks.Open(file, 0, true); // read-only
+  var sh = wb.Sheets(sheet);
+  sh.Range(rng).CopyPicture(1, 2); // xlScreen, xlBitmap
+  var ch = wb.Charts.Add();
+  ch.Paste();
+  ch.Export(png, "PNG");
+  wb.Close(false);
+  Excel.Quit();
+  WSH.Echo("OK " + png);
+} catch (e) {
+  if (Excel) { try { Excel.Quit(); } catch (e2) {} }
+  WSH.Echo("ERROR: " + e.message);
+  WSH.Quit(1);
+}
+]]></script>
+</job>
