@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Финансовый агент строительной компании — итоговый проект</title>
 <style>
-  body { margin:0; font-family:"Segoe UI", system-ui, sans-serif; background:#f4f3f0; color:#0b0b0b; }
-  header { max-width:1000px; margin:0 auto; padding:36px 20px 8px; }
-  header h1 { font-size:26px; margin:0 0 8px; font-weight:650; }
-  header p { color:#52514e; margin:0; max-width:720px; line-height:1.5; }
+  body { margin:0; font-family:"Segoe UI", system-ui, sans-serif; color:#0b0b0b; background:linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.76)) url("assets/bg-construction.jpg") center top / cover fixed no-repeat; }
+  header { max-width:1000px; margin:0 auto; padding:40px 20px 8px; text-align:center; }
+  header > div { display:flex; justify-content:center; flex-wrap:wrap; gap:4px; }
+  header h1 { font-size:34px; margin:6px 0 10px; font-weight:700; text-align:center; letter-spacing:-0.2px; }
+  header p { color:#52514e; margin:0 0 10px; max-width:760px; line-height:1.55; text-align:center; margin-left:auto; margin-right:auto; }
   main { max-width:1000px; margin:0 auto; padding:24px 20px 60px; }
   .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; align-items:start; }
   .card { background:#fff; border:1px solid #e5e4e0; border-radius:12px; padding:18px; height:100%; box-sizing:border-box; display:flex; flex-direction:column; }
@@ -22,6 +23,7 @@
   a:hover { text-decoration:underline; }
   a.go { color:#205089; text-decoration:none; white-space:nowrap; }
   .kpi { display:inline-block; background:#eef4fc; color:#205089; border-radius:8px; padding:8px 14px; font-size:13px; margin:6px 8px 0 0; }
+  .wrap, header { position:relative; }
 </style>
 </head>
 <body>
