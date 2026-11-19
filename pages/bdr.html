@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Месячный цикл БДР — интерактивная страница</title>
+<style>
+  body { margin:0; font-family:"Segoe UI", system-ui, sans-serif; background:#f4f3f0; color:#0b0b0b; }
+  .wrap { max-width:1080px; margin:0 auto; padding:26px 20px 48px; }
+  .crumb { font-size:12px; color:#7a786f; text-decoration:none; }
+  .crumb:hover { color:#1668d8; }
+  h1 { font-size:21px; font-weight:700; margin:6px 0 2px; }
+  .sub { color:#44423e; font-size:13px; margin-bottom:18px; }
+  .card { background:#fff; border:1px solid #e3e2dd; border-radius:10px; padding:16px 18px; margin-bottom:16px; box-shadow:0 2px 10px rgba(20,20,20,.06); }
+  .card h2 { font-size:14px; font-weight:600; margin:0 0 10px; }
+  .cap { font-size:12px; color:#7a786f; margin:0 0 12px; }
+  /* шаги схемы */
+  .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; }
+  .step { border:1px solid #e3e2dd; border-radius:10px; padding:12px 14px; cursor:pointer; background:#fff; }
+  .step:hover { border-color:#1668d8; background:#eef4fc; }
+  .step.on { border-color:#1668d8; background:#eef4fc; }
+  .step .t { font-weight:600; font-size:13px; }
+  .step .d { font-size:11.5px; color:#7a786f; margin-top:3px; }
+  .stepdet { margin-top:12px; border-top:1px dashed #e3e2dd; padding-top:10px; font-size:13px; color:#44423e; line-height:1.55; display:none; }
+  .stepdet ul { margin:6px 0 0 18px; padding:0; }
+  /* bar */
+  svg text { fill:#44423e; font-size:11px; }
+  svg text.v { fill:#0b0b0b; font-weight:700; }
+  .bar { fill:#1668d8; } .bar:hover { opacity:.85; }
+  #tip { position:fixed; pointer-events:none; background:#101010; color:#fff; font-size:12px; padding:5px 9px; border-radius:6px; opacity:0; transition:opacity .1s; z-index:5; }
+  /* матрица */
+  table { border-collapse:collapse; font-size:11.5px; width:100%; font-variant-numeric:tabular-nums; }
+  th,td { border-bottom:1px solid #e3e2dd; padding:4px 7px; text-align:right; white-space:nowrap; }
+  th { color:#44423e; font-weight:600; cursor:pointer; user-select:none; }
+  th:hover { color:#1668d8; }
+  th:first-child, td:first-child { text-align:left; cursor:default; }
+  td:first-child { max-width:230px; overflow:hidden; text-overflow:ellipsis; }
+  tbody tr:hover { background:#eef4fc; }
+  tr.tot td { font-weight:700; border-top:2px solid #44423e; }
+  .zero { color:#c9c8c2; }
+  .unres { margin-top:10px; font-size:12px; color:#44423e; }
+  .note { margin-top:10px; font-size:12px; color:#44423e; background:#fdf2ec; border:1px solid #f0c4b3; border-radius:8px; padding:8px 12px; display:none; }
+  .foot { color:#7a786f; font-size:11px; margin-top:10px; }
+  a { color:#1668d8; text-decoration:none; } a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="crumb" href="../index.html">← Витрина проекта</a>
+  <h1>Месячный цикл: 1С → затраты по ЦФО → ФОТ из табелей → БДР факт</h1>
+  <div class="sub">Реальный процесс — три шага, демо-январь 2027 на синтетике ООО «СтройКом». Нажимайте на шаг схемы, сортируйте матрицу, открывайте проводки каждой статьи. Ничего не потеряно: неразобранная сумма честно показана в хвосте.</div>
+
+  <div class="card">
+    <h2>Три шага конвейера — нажмите на любой</h2>
+    <div class="steps" id="steps">
+      <div class="step on" data-s="0"><div class="t">1. Выгрузка 1С → затраты по ЦФО</div><div class="d">журнал проводок → правила → затраты по подразделениям</div></div>
+      <div class="step" data-s="1"><div class="t">2. ФОТ из табелей</div><div class="d">часы и зарплаты по ЦФО и объектам</div></div>
+      <div class="step" data-s="2"><div class="t">3. БДР факт</div><div class="d">затраты + ФОТ → месячная форма</div></div>
+    </div>
+    <div class="stepdet" id="stepdet"></div>
+  </div>
+
+  <div class="card">
+    <h2>Затраты по ЦФО</h2>
+    <div class="cap">итог матрицы по подразделениям, ₽ — наведите на столбец</div>
+    <svg id="cfo" width="1020" height="190" role="img" aria-label="Затраты матрицы по ЦФО"></svg>
+    <details><summary>Таблицей</summary><table id="cfoT"><thead><tr><th>ЦФО</th><th>Сумма, ₽</th></tr></thead><tbody></tbody></table></details>
+  </div>
+
+  <div class="card">
+    <h2>Матрица БДР: 17 статей × 7 ЦФО</h2>
+    <div class="cap">кликните на шапку колонки — сортировка; кликните на строку статьи — проводки, из которых она сложилась</div>
+    <div style="overflow-x:auto">
+    <table id="mat">
+      <thead><tr id="matH"><th>Статья учета</th><th>АУП</th><th>База</th><th>ОГМ</th><th>ОГС</th><th>ОГЭ</th><th>ОМТС</th><th>ПУ-1</th><th>ИТОГО</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <div class="unres" id="unres"></div>
+    <div class="note" id="matnote"></div>
+    <div class="foot">Контроль: разнесено 16 627 970,00 + требует решения 40 000,00 = журнал после фильтра 16 667 970,00 · <a href="proverki.html">как проверяется →</a></div>
+  </div>
+</div>
+<div id="tip"></div>
+<script src="../demo/pages-data.js"></script>
+<script>
+const D = window.PAGES_DATA;
+const f2 = x => x.toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2});
+const tip = document.getElementById('tip');
+
+// ---- шаги конвейера
+const STEP_TEXT = [
+  '<b>Что происходит:</b> журнал проводок 1С раскладывается декларативными правилами — «счёт + контрагент → статья», «подразделение → ЦФО». Получаются затраты по ЦФО. Регламентные переносы (закрытие 23→20, распределение 25) исключаются честно и поимённо; непопавшее в правила попадает в лист «Требует решения» с суммой. Демо: 35 проводок, разнесено 16 627 970,00, хвост 40 000,00 — без потерь.',
+  '<b>Что происходит:</b> пофамильные табели (УМИТ, КСЛ, Сибур, Строитель, ОГЭ, табель базы…) дают часы и «сумму зарплаты на руки» каждому человеку; начисление и НДФЛ — из 1С-расчётных ведомостей. Дни, окрашенные в табеле по объектам, раскладывают часы между объектами и определяют объект строки каркаса. В демо-БДР это статьи 24/29 (ЗП, страховые взносы) по 7 ЦФО; в эксплуатации так собирается книга «ЗП и ТЗР» — до 180 строк пофамильно.',
+  '<b>Что на выходе:</b> затраты по ЦФО + ФОТ из табелей сливаются в месячную форму БДР-факт (затратная часть + ФОТ-строки), итоги — живыми формулами. Контроль: Σ строк = источникам (журнал и табеля), квартальный свод = сумме месяцев. В демо: 17 статей × 7 ЦФО, контрольные равенства сошлись без расхождений.',
+];
+const det = document.getElementById('stepdet');
+det.innerHTML = STEP_TEXT[0];
+document.querySelectorAll('.step').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.step').forEach(x => x.classList.remove('on'));
+  s.classList.add('on'); det.innerHTML = STEP_TEXT[+s.dataset.s];
+}));
+
+// ---- bar по ЦФО
+const cfoSvg = document.getElementById('cfo');
+const W = 1020, H = 190, padL = 80, padB = 28, padT = 16;
+const vals = D.bdr.bar.cells, labels = D.bdr.cfo;
+const max = Math.max(...vals) * 1.15;
+const bw = (W - padL - 20) / vals.length;
+labels.forEach((c, i) => {
+  const v = vals[i];
+  const h = Math.round(v / max * (H - padT - padB));
+  const x = padL + i * bw + 22, y = H - padB - h;
+  const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', bw - 40); r.setAttribute('height', h);
+  r.setAttribute('rx', '4'); r.setAttribute('class', 'bar');
+  r.addEventListener('mousemove', e => {
+    tip.textContent = c + ' — ' + f2(v) + ' ₽ (' + (v / D.bdr.total * 100).toFixed(1) + '% матрицы)';
+    tip.style.opacity = 1; tip.style.left = e.clientX + 12 + 'px'; tip.style.top = e.clientY - 28 + 'px';
+  });
+  r.addEventListener('mouseleave', () => tip.style.opacity = 0);
+  cfoSvg.appendChild(r);
+  const dl = document.createElementNS('http://www.w3.org/2000/svg','text');
+  dl.setAttribute('x', x + (bw - 40) / 2); dl.setAttribute('y', H - padB + 17); dl.setAttribute('text-anchor', 'middle');
+  dl.textContent = c; cfoSvg.appendChild(dl);
+  const vl = document.createElementNS('http://www.w3.org/2000/svg','text');
+  vl.setAttribute('x', x + (bw - 40) / 2); vl.setAttribute('y', y - 5); vl.setAttribute('text-anchor', 'middle');
+  vl.setAttribute('class', 'v'); vl.textContent = v >= 1000000 ? (v / 1e6).toFixed(1) + ' млн' : f2(v);
+  cfoSvg.appendChild(vl);
+});
+const axis = document.createElementNS('http://www.w3.org/2000/svg','line');
+axis.setAttribute('x1', padL - 12); axis.setAttribute('x2', W - 10); axis.setAttribute('y1', H - padB); axis.setAttribute('y2', H - padB);
+axis.setAttribute('stroke', '#e3e2dd'); cfoSvg.appendChild(axis);
+const tb2 = document.querySelector('#cfoT tbody');
+labels.forEach((c, i) => tb2.insertAdjacentHTML('beforeend','<tr><td>' + c + '</td><td>' + f2(vals[i]) + '</td></tr>'));
+
+// ---- матрица: рендер, сортировка, drill-down
+let sortCol = -1, sortDesc = true, openRow = -1;
+const tbody = document.querySelector('#mat tbody');
+const unresBox = document.getElementById('unres');
+unresBox.innerHTML = 'Хвост разбивки: <div class="tl" style="display:inline-block"><b>«Требует решения» — ' + f2(D.bdr.unresolved) + ' ₽</b></div> (суммы не потеряны — ждут правила или решения)';
+function renderMatrix() {
+  const arts = [...D.bdr.articles];
+  if (sortCol >= 0) arts.sort((a, b) => sortDesc ? b.cells[sortCol] - a.cells[sortCol] : a.cells[sortCol] - b.cells[sortCol]);
+  tbody.innerHTML = '';
+  arts.forEach((a, ai) => {
+    let tr = '<tr data-i="' + D.bdr.articles.indexOf(a) + '"' + (ai === openRow ? ' style="background:#eef4fc"' : '') +
+      '><td title="' + a.article + '">' + a.article + '</td>' +
+      a.cells.map(v => '<td' + (v ? '' : ' class="zero"') + '>' + (v ? f2(v) : '—') + '</td>').join('') +
+      '<td><b>' + f2(a.total) + '</b></td></tr>';
+    tbody.insertAdjacentHTML('beforeend', tr);
+    if (ai === openRow) {
+      const list = D.bdr.spread.filter(s => s.article === a.article);
+      tbody.insertAdjacentHTML('beforeend', '<tr><td colspan="9" style="background:#fcfcfa"><b>Проводки статьи «' + a.article + '» (' + list.length + '):</b><br>' +
+        list.map(s => s.dt + ' · ' + s.doc + ' · Дт ' + s.dt + ' ' + s.sub + ' ← Кт ' + s.kt + ' · ' + s.agent + ' · <b>' + f2(s.amount) + '</b> → ЦФО ' + s.cfo).join('<br>') + '</td></tr>');
+    }
+  });
+}
+document.querySelectorAll('#matH th').forEach((th, i) => {
+  if (i === 0) return;
+  th.addEventListener('click', () => {
+    sortCol = i - 1; sortDesc = true; openRow = -1; renderMatrix();
+  });
+});
+tbody.addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-i]');
+  if (!tr) return;
+  const i = +tr.dataset.i;
+  openRow = (openRow === i) ? -1 : i;
+  renderMatrix();
+});
+renderMatrix();
+</script>
+</body>
+</html>

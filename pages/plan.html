@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>План года по драйверам — интерактивный пульт (демо)</title>
+<style>
+  body { margin:0; font-family:"Segoe UI", system-ui, sans-serif; background:#f4f3f0; color:#0b0b0b; }
+  .wrap { max-width:1080px; margin:0 auto; padding:26px 20px 48px; }
+  .crumb { font-size:12px; color:#7a786f; text-decoration:none; }
+  .crumb:hover { color:#1668d8; }
+  h1 { font-size:21px; font-weight:700; margin:6px 0 2px; }
+  .sub { color:#44423e; font-size:13px; margin-bottom:18px; }
+  .card { background:#fff; border:1px solid #e3e2dd; border-radius:10px; padding:16px 18px; margin-bottom:16px; box-shadow:0 2px 10px rgba(20,20,20,.06); }
+  .card h2 { font-size:14px; font-weight:600; margin:0 0 10px; }
+  .cap { font-size:12px; color:#7a786f; margin:0 0 12px; }
+  .grid2 { display:grid; grid-template-columns:340px 1fr; gap:18px; align-items:start; }
+  @media (max-width:860px){ .grid2 { grid-template-columns:1fr; } }
+  .drv { border:1px solid #e3e2dd; border-radius:10px; padding:10px 14px; margin-bottom:10px; background:#fcfcfa; }
+  .drv label { font-size:12px; color:#44423e; display:flex; justify-content:space-between; gap:8px; }
+  .drv label b { font-variant-numeric:tabular-nums; color:#0b0b0b; }
+  .drv input[type=range] { width:100%; margin-top:6px; accent-color:#1668d8; }
+  .tiles2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
+  .tile { background:#fff; border:1px solid #e3e2dd; border-radius:10px; padding:12px 14px; border-left:5px solid #1668d8; }
+  .tile:nth-child(2) { border-left-color:#00a86b; }
+  .tile:nth-child(3) { border-left-color:#f05a28; }
+  .tile:nth-child(4) { border-left-color:#b9c94b; }
+  .tile .k { font-size:11.5px; color:#44423e; }
+  .tile .v { font-size:21px; font-weight:700; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .tile .n { font-size:11px; color:#7a786f; margin-top:2px; }
+  .delta { font-size:11px; margin-top:3px; font-weight:600; }
+  .up { color:#009a3e; } .down { color:#f05a28; }
+  svg text { fill:#44423e; font-size:11px; }
+  svg text.v { fill:#0b0b0b; font-weight:700; }
+  .bar { fill:#1668d8; } .bar:hover { opacity:.85; }
+  .bar.base { fill:#c9c8c2; }
+  .foot { color:#7a786f; font-size:11px; margin-top:12px; }
+  a { color:#1668d8; text-decoration:none; } a:hover { text-decoration:underline; }
+  details summary { cursor:pointer; color:#44423e; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="crumb" href="../index.html">← Витрина проекта</a>
+  <h1>План года по драйверам — интерактивный пульт</h1>
+  <div class="sub">Драйвер-бюджет: пульт параметров, из которого продажи, ГСМ и фонд оплаты труда пересчитываются в строки бюджета. Двигайте ползунки — бюджет пересобирается мгновенно. Модель упрощённая для демонстрации; в рабочей версии — 12 месяцев × пульт цен × калькуляции маш.-часа.</div>
+
+  <div class="card">
+    <h2>Пульт драйверов</h2>
+    <div class="cap">каждый ползунок — вход бюджета; итоги справа пересчитываются на лету</div>
+    <div class="grid2">
+      <div id="drivers">
+        <div class="drv"><label>Фонд маш.-часов механизмов, мес. × 12 <b id="v-mh">96 000</b></label>
+          <input type="range" id="i-mh" min="60000" max="132000" step="2000" value="96000"></div>
+        <div class="drv"><label>Ставка маш.-часа, ₽ <b id="v-rate">2 400</b></label>
+          <input type="range" id="i-rate" min="1800" max="3200" step="50" value="2400"></div>
+        <div class="drv"><label>Цена ДТ, ₽/л <b id="v-fuel">60</b></label>
+          <input type="range" id="i-fuel" min="45" max="85" step="1" value="60"></div>
+        <div class="drv"><label>Норма расхода ДТ, л/маш.-ч <b id="v-norm">11</b></label>
+          <input type="range" id="i-norm" min="7" max="15" step="0.5" value="11"></div>
+        <div class="drv"><label>Численность произв. персонала, чел. <b id="v-pp">180</b></label>
+          <input type="range" id="i-pp" min="120" max="260" step="5" value="180"></div>
+        <div class="drv"><label>ФОТ на человека в месяц (на руки), ₽ <b id="v-fotp">55 000</b></label>
+          <input type="range" id="i-fotp" min="40000" max="85000" step="1000" value="55000"></div>
+      </div>
+      <div>
+        <div class="tiles2">
+          <div class="tile"><div class="k">Выручка года (план)</div><div class="v" id="o-rev">—</div><div class="n">маш.-часы × ставка</div><div class="delta" id="d-rev"></div></div>
+          <div class="tile"><div class="k">ГСМ (затраты года)</div><div class="v" id="o-fuel">—</div><div class="n">маш.-часы × норма × цена</div><div class="delta" id="d-fuel"></div></div>
+          <div class="tile"><div class="k">ФОТ производственный</div><div class="v" id="o-fot">—</div><div class="n">чел. × ФОТ × 12 мес.</div><div class="delta" id="d-fotd"></div></div>
+          <div class="tile"><div class="k">Валовая прибыль</div><div class="v" id="o-gp">—</div><div class="n">выручка − ГСМ − ФОТ</div><div class="delta" id="d-gp"></div></div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="cap">выручка и валовая по кварталам при текущем пульте (серый — базовый план), млн ₽</div>
+          <svg id="qsvg" width="640" height="190" role="img" aria-label="Выручка по кварталам"></svg>
+        </div>
+      </div>
+    </div>
+    <div class="foot">Связь с рабочей моделью 2027: пульт Ш_0 (цены ДТ/бензина, масла) → калькуляция маш.-часа 3.3.1 → 12 месяцев смет по объектам → свод Ш_1.1. Здесь — упрощённая демонстрация принципа «драйвер → строки бюджета».</div>
+    <details><summary>Как считается (упрощённая модель демо)</summary>
+      <ul style="margin:6px 0 0 18px;font-size:12px;color:#44423e">
+        <li>Выручка = фонд маш.-часов × ставка маш.-часа (+ 12% прочей выручки — генподряд, аренда)</li>
+        <li>ГСМ = фонд маш.-часов × норма расхода × цена ДТ (в рабочей модели — по пульту цен на 12 месяцев)</li>
+        <li>ФОТ производственный = численность × ФОТ/чел × 12 (без страховых взносов — отдельно)</li>
+        <li>Валовая = выручка − ГСМ − ФОТ (упрощение: без материалов, субподряда, УР)</li>
+      </ul>
+    </details>
+  </div>
+</div>
+<script>
+const BASE = { mh: 96000, rate: 2400, fuel: 60, norm: 11, pp: 180, fotp: 55000 };
+const q = id => document.getElementById(id);
+const fmt = x => x.toLocaleString('ru-RU', {maximumFractionDigits:1});
+const f2 = x => x.toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2});
+function calc(p) {
+  const rev = p.mh * p.rate * 1.12;
+  const fuel = p.mh * p.norm * p.fuel;
+  const fot = p.pp * p.fotp * 12;
+  return { rev, fuel, fot, gp: rev - fuel - fot };
+}
+function render() {
+  const g = id => +q(id).value;
+  const p = { mh:g('i-mh'), rate:g('i-rate'), fuel:g('i-fuel'), norm:g('i-norm'), pp:g('i-pp'), fotp:g('i-fotp') };
+  // подписи ползунков
+  q('v-mh').textContent = fmt(p.mh); q('v-rate').textContent = fmt(p.rate);
+  q('v-fuel').textContent = p.fuel; q('v-norm').textContent = p.norm;
+  q('v-pp').textContent = p.pp; q('v-fotp').textContent = fmt(p.fotp);
+  const c = calc(p), b = calc(BASE);
+  const set = (id, v) => q(id).textContent = v >= 1e6 ? fmt(v/1e6) + ' млн' : f2(v);
+  set('o-rev', c.rev); set('o-fuel', c.fuel); set('o-fot', c.fot); set('o-gp', c.gp);
+  const pct = (x, base) => { const d = (x / base - 1) * 100; if (Math.abs(d) < 0.5) return 'без изменений'; return (d > 0 ? '▲ +' : '▼ ') + d.toFixed(1) + '% к базовому плану'; };
+  const paint = el => { el.classList.toggle('up', el.textContent.startsWith('▲') || el.textContent.startsWith('без')); el.classList.toggle('down', el.textContent.startsWith('▼')); };
+  [['d-rev', c.rev, b.rev], ['d-fuel', c.fuel, b.fuel], ['d-fotd', c.fot, b.fot], ['d-gp', c.gp, b.gp]].forEach(([id, v, base]) => { q(id).textContent = pct(v, base); paint(q(id)); });
+  // кварталы
+  const svg = q('qsvg'); svg.innerHTML = '';
+  const qs = [0.20, 0.24, 0.26, 0.30], baseQ = [0.20, 0.24, 0.26, 0.30];
+  const W = 640, H = 190, padL = 46, padB = 28, padT = 16;
+  const max = Math.max(c.rev, b.rev) * 1.12;
+  const bw = (W - padL - 16) / 4;
+  qs.forEach((qf, i) => {
+    const v = c.rev * qf, base = b.rev * baseQ[i];
+    const bx = padL + i * bw + 26;
+    const hb = Math.round(base / max * (H - padT - padB));
+    const hbBar = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    hbBar.setAttribute('x', bx - 14); hbBar.setAttribute('y', H - padB - hb); hbBar.setAttribute('width', 44);
+    hbBar.setAttribute('height', hb); hbBar.setAttribute('rx', '4'); hbBar.setAttribute('class', 'bar base');
+    svg.appendChild(hbBar);
+    const h = Math.round(v / max * (H - padT - padB));
+    const bar = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bar.setAttribute('x', bx); bar.setAttribute('y', H - padB - h); bar.setAttribute('width', 16);
+    bar.setAttribute('height', h); bar.setAttribute('rx', '4'); bar.setAttribute('class', 'bar');
+    svg.appendChild(bar);
+    const dl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    dl.setAttribute('x', bx + 12); dl.setAttribute('y', H - padB + 17); dl.setAttribute('text-anchor', 'middle');
+    dl.textContent = 'Q' + (i + 1); svg.appendChild(dl);
+    const vl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    vl.setAttribute('x', bx + 12); vl.setAttribute('y', H - padB - h - 6); vl.setAttribute('text-anchor', 'middle'); vl.setAttribute('class', 'v');
+    vl.textContent = fmt(v / 1e6) + ''; svg.appendChild(vl);
+  });
+  const axis = document.createElementNS('http://www.w3.org/2000/svg','line');
+  axis.setAttribute('x1', padL - 12); axis.setAttribute('x2', W - 10); axis.setAttribute('y1', H - padB); axis.setAttribute('y2', H - padB);
+  axis.setAttribute('stroke', '#e3e2dd'); svg.appendChild(axis);
+}
+document.querySelectorAll('#drivers input').forEach(i => i.addEventListener('input', render));
+render();
+</script>
+</body>
+</html>

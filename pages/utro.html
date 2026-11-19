@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конвейер «утро» — интерактивная страница (демо)</title>
+<style>
+  body { margin:0; font-family:"Segoe UI", system-ui, sans-serif; background:#f4f3f0; color:#0b0b0b; }
+  .wrap { max-width:1080px; margin:0 auto; padding:26px 20px 48px; }
+  .crumb { font-size:12px; color:#7a786f; text-decoration:none; }
+  .crumb:hover { color:#1668d8; }
+  h1 { font-size:21px; font-weight:700; margin:6px 0 2px; }
+  .sub { color:#44423e; font-size:13px; margin-bottom:20px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:18px; }
+  .tile { background:#fff; border:1px solid #e3e2dd; border-radius:10px; padding:14px 16px; position:relative; overflow:hidden; box-shadow:0 2px 10px rgba(20,20,20,.06); }
+  .tile::before { content:""; position:absolute; left:0; top:0; bottom:0; width:5px; }
+  .tile:nth-child(1)::before { background:#1668d8; }
+  .tile:nth-child(2)::before { background:#00a86b; }
+  .tile:nth-child(3)::before { background:#f05a28; }
+  .tile:nth-child(4)::before { background:#b9c94b; }
+  .tile .k { font-size:12px; color:#44423e; }
+  .tile .v { font-size:24px; font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums; }
+  .tile .n { font-size:12px; color:#7a786f; margin-top:2px; }
+  .card { background:#fff; border:1px solid #e3e2dd; border-radius:10px; padding:16px 18px; margin-bottom:16px; box-shadow:0 2px 10px rgba(20,20,20,.06); }
+  .card h2 { font-size:14px; font-weight:600; margin:0 0 10px; }
+  .cap { font-size:12px; color:#7a786f; margin:0 0 12px; }
+  svg text { fill:#44423e; font-size:11px; }
+  svg text.v { fill:#0b0b0b; font-weight:700; }
+  .bar { fill:#1668d8; }
+  .bar:hover { opacity:.85; }
+  #tip { position:fixed; pointer-events:none; background:#101010; color:#fff; font-size:12px; padding:5px 9px; border-radius:6px; opacity:0; transition:opacity .1s; z-index:5; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; align-items:center; }
+  .chip { border:1px solid #d6d5d0; background:#fff; border-radius:999px; padding:5px 14px; font-size:12px; cursor:pointer; color:#44423e; user-select:none; }
+  .chip:hover { border-color:#1668d8; color:#1668d8; }
+  .chip.on { background:#1668d8; border-color:#1668d8; color:#fff; }
+  .search { border:1px solid #d6d5d0; border-radius:999px; padding:5px 14px; font-size:12px; min-width:180px; }
+  .live { margin-left:auto; font-size:12px; color:#44423e; font-variant-numeric:tabular-nums; }
+  .live b { color:#0b0b0b; }
+  table { border-collapse:collapse; font-size:12px; width:100%; }
+  th,td { border-bottom:1px solid #e3e2dd; padding:5px 8px; text-align:right; font-variant-numeric:tabular-nums; }
+  th { color:#44423e; font-weight:600; }
+  th:nth-child(-n+5), td:nth-child(-n+5) { text-align:left; }
+  tbody tr:hover { background:#eef4fc; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:0; }
+  .s1 { background:#00a86b; } .s2 { background:#f05a28; } .s3 { background:#b9c94b; }
+  .foot { color:#7a786f; font-size:11px; margin-top:12px; }
+  .foot b { color:#009a3e; }
+  a { color:#1668d8; text-decoration:none; } a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="crumb" href="../index.html">← Витрина проекта</a>
+  <h1>Конвейер «утро» — интерактивный перечень</h1>
+  <div class="sub">Демо-прогон на синтетических данных ООО «СтройКом»: 4 входных файла → перечень к оплате на утро 18.01.2027. Фильтруйте статусы и ищите контрагентов — всё пересчитывается на лету.</div>
+
+  <div class="tiles">
+    <div class="tile"><div class="k">К оплате по перечню</div><div class="v" id="t-total">—</div><div class="n">ОБЩИЙ ИТОГ демонстрации</div></div>
+    <div class="tile"><div class="k">Позиций в перечне</div><div class="v" id="t-count">—</div><div class="n">в том числе сгруппированные</div></div>
+    <div class="tile"><div class="k">Планируется сегодня</div><div class="v" id="t-today">—</div><div class="n">колонка 18.01.2027</div></div>
+    <div class="tile"><div class="k">Сверка с контрольными суммами</div><div class="v">0,00</div><div class="n">расхождение сборки</div></div>
+  </div>
+
+  <div class="card">
+    <h2>План оплат по дням</h2>
+    <div class="cap">млн ₽ → наведите курсор на столбец; под графиком — таблица с этими же цифрами</div>
+    <svg id="days" width="1020" height="180" role="img" aria-label="План оплат по дням"></svg>
+    <details><summary>Таблицей</summary><table id="daysT"><thead><tr><th>День</th><th>Сумма, ₽</th></tr></thead><tbody></tbody></table></details>
+  </div>
+
+  <div class="card">
+    <h2>Перечень неоплаченных заявок</h2>
+    <div class="cap">фильтр по статусу, поиск по тексту; сумма выбранного пересчитывается мгновенно</div>
+    <div class="chips" id="chips">
+      <span class="chip on" data-s="все">Все</span>
+      <span class="chip" data-s="УТВЕРЖДЕН">УТВЕРЖДЕН <span class="dot s1"></span></span>
+      <span class="chip" data-s="НА УТВЕРЖДЕНИИ">НА УТВЕРЖДЕНИИ <span class="dot s2"></span></span>
+      <span class="chip" data-s="НА ФОРМИРОВАНИИ ">НА ФОРМИРОВАНИИ <span class="dot s3"></span></span>
+      <input class="search" id="q" placeholder="Поиск контрагента или счета…">
+      <span class="live">Выбрано: <b id="live-n">0</b> позиций · <b id="live-sum">0,00</b> ₽</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="tbl">
+      <thead><tr><th>Статус</th><th>Контрагент</th><th>Содержание</th><th>Реестр</th><th>План</th><th>Сумма, ₽</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <div class="foot">Синтетические данные ООО «СтройКом» · Сборка COM с самопроверкой + независимая верификация Node: <b>все контроля зелёные</b> · <a href="proverki.html">как проверяется →</a></div>
+  </div>
+</div>
+<div id="tip"></div>
+<script src="../demo/pages-data.js"></script>
+<script>
+const D = window.PAGES_DATA;
+const f2 = x => x.toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2});
+const PLAN_DAYS = ['18.01.2027','19.01.2027','20.01.2027','23.01.2027','27.01.2027'];
+document.getElementById('t-total').textContent = f2(D.total);
+document.getElementById('t-count').textContent = D.rows.length;
+document.getElementById('t-today').textContent = f2(D.byDay[0]);
+
+// ---- план по дням: столбики с hover-прилёпой
+const svg = document.getElementById('days');
+const W = 1020, H = 180, padL = 70, padB = 26, padT = 14;
+const max = Math.max(...D.byDay) * 1.18;
+const bw = (W - padL - 30) / D.byDay.length;
+const tip = document.getElementById('tip');
+PLAN_DAYS.forEach((day, i) => {
+  const v = D.byDay[i];
+  const h = Math.round(v / max * (H - padT - padB));
+  const x = padL + i * bw + 18, y = H - padB - h;
+  const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', bw - 36); r.setAttribute('height', h);
+  r.setAttribute('rx', '4'); r.setAttribute('class', 'bar');
+  r.addEventListener('mousemove', e => {
+    tip.textContent = day + ' — ' + f2(v) + ' ₽ (' + (v / D.total * 100).toFixed(1) + '% перечня)';
+    tip.style.opacity = 1; tip.style.left = e.clientX + 12 + 'px'; tip.style.top = e.clientY - 30 + 'px';
+  });
+  r.addEventListener('mouseleave', () => tip.style.opacity = 0);
+  svg.appendChild(r);
+  const dl = document.createElementNS('http://www.w3.org/2000/svg','text');
+  dl.setAttribute('x', x + (bw - 36) / 2); dl.setAttribute('y', H - padB + 16); dl.setAttribute('text-anchor', 'middle');
+  dl.textContent = day.slice(0, 5); svg.appendChild(dl);
+  if (v >= Math.max(...D.byDay)) {
+    const vl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    vl.setAttribute('x', x + (bw - 36) / 2); vl.setAttribute('y', y - 6); vl.setAttribute('text-anchor', 'middle'); vl.setAttribute('class', 'v');
+    vl.textContent = f2(v); svg.appendChild(vl);
+  }
+});
+// рамка-базалиния и таблица
+const axis = document.createElementNS('http://www.w3.org/2000/svg','line');
+axis.setAttribute('x1', padL - 10); axis.setAttribute('x2', W - 10); axis.setAttribute('y1', H - padB); axis.setAttribute('y2', H - padB);
+axis.setAttribute('stroke', '#e3e2dd'); svg.appendChild(axis);
+const tb = document.querySelector('#daysT tbody');
+PLAN_DAYS.forEach((day, i) => tb.insertAdjacentHTML('beforeend','<tr><td>'+day+'</td><td>'+f2(D.byDay[i])+'</td></tr>'));
+tb.parentElement.insertAdjacentHTML('afterend',''); // no-op: сохраняет узел таблицы
+
+// ---- таблица заявок с фильтрами
+let curFilter = 'все';
+const tbody = document.querySelector('#tbl tbody');
+function rowHtml(r) {
+  const cls = r.sec === 'УТВЕРЖДЕН' ? 's1' : r.sec === 'НА УТВЕРЖДЕНИИ' ? 's2' : 's3';
+  const plan = r.plan >= 0 ? PLAN_DAYS[r.plan].slice(0, 5) : '—';
+  return '<tr><td><span class="dot ' + cls + '"></span>' + r.sec.toLowerCase() + '</td><td>' + r.agent +
+         '</td><td>' + r.cont + '</td><td>' + r.reg.replace(/ от .*$/, '') + '</td><td>' + plan + '</td><td>' + f2(r.amount) + '</td></tr>';
+}
+function render() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  let n = 0, s = 0;
+  tbody.innerHTML = '';
+  for (const r of D.rows) {
+    if (curFilter !== 'все' && r.sec !== curFilter) continue;
+    if (q && !((r.agent + ' ' + r.cont).toLowerCase().includes(q))) continue;
+    tbody.insertAdjacentHTML('beforeend', rowHtml(r));
+    n++; s = +(s + r.amount).toFixed(2);
+  }
+  document.getElementById('live-n').textContent = n;
+  document.getElementById('live-sum').textContent = f2(s);
+}
+document.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  ch.classList.add('on'); curFilter = ch.dataset.s; render();
+}));
+document.getElementById('q').addEventListener('input', render);
+render();
+</script>
+</body>
+</html>

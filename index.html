@@ -39,39 +39,40 @@
     <span class="kpi">20+ рабочих дней непрерывной эксплуатации</span>
   </div>
   <div class="grid" style="margin-top:18px">
-    <div class="card">
-      <h2>1. Конвейер «утро» (главный сценарий)</h2>
-      <p>Утром агент получает 4 файла (выписка, реестры платежей, журнал заявок, перечень 1С) и за минуты строит перечень неоплаченных заявок с живыми формулами и независимой сверкой.</p>
+    <a class="card" href="pages/utro.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
+      <h2>1. Конвейер «утро» (главный сценарий) <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
+      <p>Утром агент получает 4 файла (выписка, реестры платежей, журнал заявок, перечень 1С) и за минуты строит перечень неоплаченных заявок с живыми формулами и независимой сверкой. <b>На странице — демо-перечень живой</b>: фильтры по статусам, поиск, план оплат по дням.</p>
       <img src="screens/01-artefact-full.png" alt="Перечень неоплаченных заявок (демо)">
-    </div>
-    <div class="card">
-      <h2>2. Каждый файл сам доказывает свою правильность</h2>
+    </a>
+    <a class="card" href="pages/proverki.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
+      <h2>2. Каждый файл сам доказывает свою правильность <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
       <p>После сборки работают два независимых контролёра: (1) сборщик перед сохранением сверяет
       собственные контрольные суммы и не записывает файл при расхождении; (2) отдельный скрипт
       открывает готовый Excel заново и проверяет его «глазами со стороны» — суммы всех колонок,
-      итоговые формулы, фильтры. Результат проверки хранится рядом с файлом.</p>
+      итоговые формулы, фильтры. <b>На странице — все 4 уровня контроля с фактическими результатами</b>.</p>
       <p><a href="demo-output/verification-report.md">Пример журнала проверки →</a></p>
       <img src="screens/02-artefact-header.png" alt="Шапка перечня с формулами">
-    </div>
-    <div class="card">
-      <h2>3. Ежемесячный цикл: выгрузка 1С → разбивка по ЦФО → БДР</h2>
-      <p>Раз в месяц конвейер берёт журнал проводок 1С и раскладывает его на статьи и подразделения,
-      сверяя каждую сумму: расхождение раскладки с журналом — ноль, всё нераспределённое честно
-      попадает в лист «Требует решения».</p>
-      <svg viewBox="0 0 560 190" style="width:100%;display:block" role="img" aria-label="Схема: выгрузка 1С → разбивка по ЦФО → БДР">
+    </a>
+    <a class="card" href="pages/bdr.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
+      <h2>3. Месячный цикл: 1С → затраты по ЦФО → ФОТ из табелей → БДР факт <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
+      <p>Раз в месяц: (1) выгрузка из 1С — затраты по ЦФО декларативными правилами;
+      (2) ФОТ для БДР из пофамильных табелей с разбивкой по ЦФО и объектам;
+      (3) БДР факт — затратная часть + ФОТ в месячной форме. Все перераспределённые суммы сверяются:
+      расхождение — ноль, непопавшее честно в лист «Требует решения». <b>На странице — шаги цикла, затраты по ЦФО и матрица с проводками каждой статьи</b>.</p>
+      <svg viewBox="0 0 560 190" style="width:100%;display:block" role="img" aria-label="Схема: выгрузка 1С → затраты по ЦФО → ФОТ из табелей → БДР факт">
         <g font-family="Segoe UI, sans-serif" font-size="11">
           <rect x="6" y="30" width="128" height="52" rx="8" fill="#eef4fc" stroke="#2a78d6"/>
           <text x="70" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">Выгрузка 1С</text>
           <text x="70" y="66" text-anchor="middle" fill="#44423e">журнал проводок</text>
-          <text x="70" y="79" text-anchor="middle" fill="#7a786f">затраты, ФОТ, аморт.</text>
+          <text x="70" y="79" text-anchor="middle" fill="#7a786f">затраты → по ЦФО</text>
           <rect x="166" y="30" width="140" height="52" rx="8" fill="#e8f9f1" stroke="#00a86b"/>
-          <text x="236" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">Правила разбивки</text>
-          <text x="236" y="66" text-anchor="middle" fill="#44423e">статья ↔ счёт/контрагент</text>
-          <text x="236" y="79" text-anchor="middle" fill="#7a786f"> подразделение → ЦФО</text>
+          <text x="236" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">ФОТ из табелей</text>
+          <text x="236" y="66" text-anchor="middle" fill="#44423e">пофамильно: часы, сумма</text>
+          <text x="236" y="79" text-anchor="middle" fill="#7a786f">разделение: ЦФО × объекты</text>
           <rect x="338" y="30" width="134" height="52" rx="8" fill="#fdf2ec" stroke="#f05a28"/>
-          <text x="405" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">Матрица БДР</text>
-          <text x="405" y="66" text-anchor="middle" fill="#44423e">статей × ЦФО</text>
-          <text x="405" y="79" text-anchor="middle" fill="#7a786f">итоги с формулами</text>
+          <text x="405" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">БДР факт</text>
+          <text x="405" y="66" text-anchor="middle" fill="#44423e">затраты + ФОТ</text>
+          <text x="405" y="79" text-anchor="middle" fill="#7a786f">месячная форма, итоги</text>
           <line x1="134" y1="56" x2="164" y2="56" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
           <line x1="306" y1="56" x2="336" y2="56" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
           <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#52514e"/></marker></defs>
@@ -79,20 +80,25 @@
           <text x="158" y="138" text-anchor="middle" fill="#0b0b0b" font-weight="600">Регламентные переносы — исключены</text>
           <text x="158" y="152" text-anchor="middle" fill="#7a786f">закрытие 23→20, распределение 25</text>
           <rect x="300" y="118" width="196" height="46" rx="8" fill="#fff" stroke="#d6d5d0"/>
-          <text x="398" y="138" text-anchor="middle" fill="#0b0b0b" font-weight="600">Контроль: Σ матрицы = Σ журнала</text>
+          <text x="398" y="138" text-anchor="middle" fill="#0b0b0b" font-weight="600">Контроль: Σ строк = источникам</text>
           <text x="398" y="152" text-anchor="middle" fill="#009a3e" font-weight="700">расхождение 0,00 ₽</text>
           <line x1="158" y1="118" x2="236" y2="84" stroke="#c9c8c2" stroke-width="1.4"/>
           <line x1="398" y1="118" x2="405" y2="84" stroke="#c9c8c2" stroke-width="1.4"/>
         </g>
       </svg>
       <p><a href="demo-output/bdr-verification-report.md">Журнал проверки БДР →</a></p>
-    </div>
-    <div class="card">
-      <h2>4. Дашборд руководителя</h2>
+    </a>
+    <a class="card" href="dashboard/index.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
+      <h2>4. Дашборд руководителя <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть дашборд →</span></h2>
       <p>Деньги за день и бюджет года на одном экране; демо-версия на вымышленных данных открывается в браузере.</p>
-      <p><a href="dashboard/index.html">Открыть демо-дашборд →</a></p>
       <img src="screens/05-dashboard.png" alt="Демо-дашборд">
-    </div>
+    </a>
+    <a class="card" href="pages/plan.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
+      <h2>5. План года по драйверам <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
+      <p>Драйвер-бюджет: пульт параметров (фонд маш.-часов, ставка, цена ДТ, численность, ФОТ), из которого
+      выручка, затраты и валовая пересчитываются в строки бюджета. <b>На странице — интерактивный пульт:
+      двигайте драйверы, бюджет пересобирается мгновенно</b>. Развитие после отчётности: планирование, а не только факт.</p>
+    </a>
   <div class="card" style="margin-top:14px">
     <h2>Как запустить у себя</h2>
     <p>Windows + Node.js + Excel. Полный пошаговый разбор на синтетических данных —

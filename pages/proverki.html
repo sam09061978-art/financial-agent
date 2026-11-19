@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Как артефакты доказывают свою правильность — интерактивная страница</title>
+<style>
+  body { margin:0; font-family:"Segoe UI", system-ui, sans-serif; background:#f4f3f0; color:#0b0b0b; }
+  .wrap { max-width:900px; margin:0 auto; padding:26px 20px 48px; }
+  .crumb { font-size:12px; color:#7a786f; text-decoration:none; }
+  .crumb:hover { color:#1668d8; }
+  h1 { font-size:21px; font-weight:700; margin:6px 0 2px; }
+  .sub { color:#44423e; font-size:13px; margin-bottom:18px; }
+  .hero { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:18px; }
+  .htile { background:#fff; border:1px solid #e3e2dd; border-radius:10px; padding:16px 18px; box-shadow:0 2px 10px rgba(20,20,20,.06); text-align:center; }
+  .htile .v { font-size:30px; font-weight:700; color:#009a3e; font-variant-numeric:tabular-nums; }
+  .htile .k { font-size:12px; color:#44423e; margin-top:4px; }
+  .lvl { background:#fff; border:1px solid #e3e2dd; border-radius:10px; margin-bottom:12px; box-shadow:0 2px 10px rgba(20,20,20,.06); overflow:hidden; }
+  .lvl summary { list-style:none; cursor:pointer; padding:14px 18px; display:flex; align-items:center; gap:12px; font-weight:600; font-size:14px; user-select:none; }
+  .lvl summary::-webkit-details-marker { display:none; }
+  .lvl summary:hover { background:#eef4fc; }
+  .num { display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; border-radius:50%; background:#1668d8; color:#fff; font-size:13px; }
+  .arrow { margin-left:auto; color:#7a786f; transition:transform .15s; }
+  .lvl[open] .arrow { transform:rotate(90deg); }
+  .lvl .body { padding:0 18px 16px; border-top:1px solid #e3e2dd; font-size:13px; color:#44423e; line-height:1.55; }
+  .lvl .body ul { margin:8px 0 0 18px; padding:0; }
+  .lvl .body li { margin:5px 0; }
+  .ok { color:#009a3e; font-weight:600; }
+  .mono { font-variant-numeric:tabular-nums; }
+  .foot { color:#7a786f; font-size:11px; margin-top:8px; }
+  a { color:#1668d8; text-decoration:none; } a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="crumb" href="../index.html">← Витрина проекта</a>
+  <h1>Как артефакты доказывают свою правильность</h1>
+  <div class="sub">Четыре уровня контроля: два встроенных в сборку и два внешних по отношению к сборщику. Нажмите на уровень — внутри конкретные проверки и их фактические результаты на демо-прогоне.</div>
+
+  <div class="hero">
+    <div class="htile"><div class="v">0,00</div><div class="k">расхождение с выпиской<br>за все дни эксплуатации</div></div>
+    <div class="htile"><div class="v">0,00</div><div class="k">расхождение раскладки БДР<br>с журналом проводок</div></div>
+    <div class="htile"><div class="v">29×3</div><div class="k">правил постстрочного контроля<br>в квартальном своде — 0 расхождений</div></div>
+  </div>
+
+  <details class="lvl" open>
+    <summary><span class="num">1</span>Самопроверка сборщика — «не записать при расхождении»<span class="arrow">›</span></summary>
+    <div class="body">Сборщик (COM/Excel) перед сохранением книги пересчитывает собственные контрольные суммы и сравнивает с ожиданиями из исходников. Расхождение — сборка падает, файл не создаётся.
+      <ul>
+        <li>Контрольные суммы секций перечня: <span class="ok">212 900,00 / 131 578,10 / 216 834,09</span> — сходятся с генератором <span class="mono mono"></span></li>
+        <li>ОБЩИЙ ИТОГ <span class="ok mono">561 312,19 ₽</span> — совпадение с планом по дням <span class="ok">43 880 + 87 698,10 + 319 489,30 + 87 696,44 + 22 548,35</span></li>
+        <li>БДР: «разнесено + неразобранное = журнал после фильтра» — <span class="ok mono">16 627 970,00 + 40 000 = 16 667 970,00</span> сошлось</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="lvl">
+    <summary><span class="num">2</span>Независимый верификатор — «глаза со стороны»<span class="arrow">›</span></summary>
+    <div class="body">Отдельный скрипт (Node.js + SheetJS) открывает уже готовый Excel и проверяет его заново, не доверяя сборщику и не используя его переменные.
+      <ul>
+        <li>Формулы итогов присутствуют (SUM по колонкам и секциям), фильтры-автофильтры на месте</li>
+        <li>Построчные суммы колонок дат = итогу колонки; суммы реестров = контрольным суммам шапок</li>
+        <li>Итоги журнала верификации приложены рядом с каждым артефактом:
+          <a href="../demo-output/verification-report.md">перечень →</a>,
+          <a href="../demo-output/bdr-verification-report.md">БДР →</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="lvl">
+    <summary><span class="num">3</span>Сверка с первоисточником — банку доверяют не слепо<span class="arrow">›</span></summary>
+    <div class="body">Итоговый контроль против первичного документа: «поступления + списания выписки = контрольный итог файла выписки». Это та сверка, которую вручную делают часами.
+      <ul>
+        <li>Демо: <span class="ok mono">5 036 869,99 + 5 032 550,00 = 10 069 419,99</span> — сходится с итогом выписки</li>
+        <li>В эксплуатации (26.10–18.11.2026): <span class="ok">расхождение 0,00 каждый рабочий день</span></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="lvl">
+    <summary><span class="num">4</span>Журнал проверки прикладывается к артефакту<span class="arrow">›</span></summary>
+    <div class="body">Каждая сборка оставляет за собой машиночитаемый журнал: что проверялось, какие суммы, какие результаты. Проверяемость не зависит от автора — журнал можно показать любому.
+      <ul>
+        <li><a href="../demo-output/verification-report.md">Журнал перечня</a> — колонки, секции, формулы, фильтры</li>
+        <li><a href="../demo-output/bdr-verification-report.md">Журнал БДР</a> — «17 статей / 7 ЦФО / разнесено 16 627 970 / требует решения 40 000»</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="foot">Демо-прогон 18.01.2027 на синтетике ООО «СтройКом». <a href="utro.html">← перечень «утро»</a> · <a href="bdr.html">месячный цикл БДР →</a></div>
+</div>
+</body>
+</html>
