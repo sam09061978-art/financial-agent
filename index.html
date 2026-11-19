@@ -10,14 +10,17 @@
   header h1 { font-size:26px; margin:0 0 8px; font-weight:650; }
   header p { color:#52514e; margin:0; max-width:720px; line-height:1.5; }
   main { max-width:1000px; margin:0 auto; padding:24px 20px 60px; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:14px; }
-  .card { background:#fff; border:1px solid #e5e4e0; border-radius:12px; padding:18px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; align-items:start; }
+  .card { background:#fff; border:1px solid #e5e4e0; border-radius:12px; padding:18px; height:100%; box-sizing:border-box; display:flex; flex-direction:column; }
   .card h2 { font-size:15px; margin:0 0 6px; }
   .card p { color:#52514e; font-size:13px; margin:0 0 10px; line-height:1.5; }
-  .card img { width:100%; border:1px solid #e5e4e0; border-radius:8px; display:block; }
+  .card a { color:#2a78d6; }
+  .card img { width:100%; height:200px; object-fit:cover; object-position:top; border:1px solid #e5e4e0; border-radius:8px; display:block; margin-top:auto; }
+  .card:hover { border-color:#2a78d6; box-shadow:0 3px 14px rgba(22,104,216,.10); }
   .badge { display:inline-block; font-size:11px; color:#52514e; border:1px solid #d6d5d0; border-radius:999px; padding:2px 10px; margin:2px 4px 6px 0; }
   a { color:#2a78d6; text-decoration:none; }
   a:hover { text-decoration:underline; }
+  a.go { color:#205089; text-decoration:none; white-space:nowrap; }
   .kpi { display:inline-block; background:#eef4fc; color:#205089; border-radius:8px; padding:8px 14px; font-size:13px; margin:6px 8px 0 0; }
 </style>
 </head>
@@ -39,66 +42,47 @@
     <span class="kpi">20+ рабочих дней непрерывной эксплуатации</span>
   </div>
   <div class="grid" style="margin-top:18px">
-    <a class="card" href="pages/utro.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
-      <h2>1. Конвейер «утро» (главный сценарий) <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
+    <div class="card">
+      <h2>1. Конвейер «утро» (главный сценарий) <a class="go" href="pages/utro.html" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</a></h2>
       <p>Утром агент получает 4 файла (выписка, реестры платежей, журнал заявок, перечень 1С) и за минуты строит перечень неоплаченных заявок с живыми формулами и независимой сверкой. <b>На странице — демо-перечень живой</b>: фильтры по статусам, поиск, план оплат по дням.</p>
       <img src="screens/01-artefact-full.png" alt="Перечень неоплаченных заявок (демо)">
-    </a>
-    <a class="card" href="pages/proverki.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
-      <h2>2. Каждый файл сам доказывает свою правильность <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
+    </div>
+    <div class="card">
+      <h2>2. Каждый файл сам доказывает свою правильность <a class="go" href="pages/proverki.html" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</a></h2>
       <p>После сборки работают два независимых контролёра: (1) сборщик перед сохранением сверяет
       собственные контрольные суммы и не записывает файл при расхождении; (2) отдельный скрипт
       открывает готовый Excel заново и проверяет его «глазами со стороны» — суммы всех колонок,
       итоговые формулы, фильтры. <b>На странице — все 4 уровня контроля с фактическими результатами</b>.</p>
       <p><a href="demo-output/verification-report.md">Пример журнала проверки →</a></p>
       <img src="screens/02-artefact-header.png" alt="Шапка перечня с формулами">
-    </a>
-    <a class="card" href="pages/bdr.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
-      <h2>3. Месячный цикл: 1С → затраты по ЦФО → ФОТ из табелей → БДР факт <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
+    </div>
+    <div class="card">
+      <h2>3. Месячный цикл: 1С → затраты по ЦФО → ФОТ из табелей → БДР факт <a class="go" href="pages/bdr.html" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</a></h2>
       <p>Раз в месяц: (1) выгрузка из 1С — затраты по ЦФО декларативными правилами;
       (2) ФОТ для БДР из пофамильных табелей с разбивкой по ЦФО и объектам;
-      (3) БДР факт — затратная часть + ФОТ в месячной форме. Все перераспределённые суммы сверяются:
-      расхождение — ноль, непопавшее честно в лист «Требует решения». <b>На странице — шаги цикла, затраты по ЦФО и матрица с проводками каждой статьи</b>.</p>
-      <svg viewBox="0 0 560 190" style="width:100%;display:block" role="img" aria-label="Схема: выгрузка 1С → затраты по ЦФО → ФОТ из табелей → БДР факт">
-        <g font-family="Segoe UI, sans-serif" font-size="11">
-          <rect x="6" y="30" width="128" height="52" rx="8" fill="#eef4fc" stroke="#2a78d6"/>
-          <text x="70" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">Выгрузка 1С</text>
-          <text x="70" y="66" text-anchor="middle" fill="#44423e">журнал проводок</text>
-          <text x="70" y="79" text-anchor="middle" fill="#7a786f">затраты → по ЦФО</text>
-          <rect x="166" y="30" width="140" height="52" rx="8" fill="#e8f9f1" stroke="#00a86b"/>
-          <text x="236" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">ФОТ из табелей</text>
-          <text x="236" y="66" text-anchor="middle" fill="#44423e">пофамильно: часы, сумма</text>
-          <text x="236" y="79" text-anchor="middle" fill="#7a786f">разделение: ЦФО × объекты</text>
-          <rect x="338" y="30" width="134" height="52" rx="8" fill="#fdf2ec" stroke="#f05a28"/>
-          <text x="405" y="50" text-anchor="middle" fill="#0b0b0b" font-weight="600">БДР факт</text>
-          <text x="405" y="66" text-anchor="middle" fill="#44423e">затраты + ФОТ</text>
-          <text x="405" y="79" text-anchor="middle" fill="#7a786f">месячная форма, итоги</text>
-          <line x1="134" y1="56" x2="164" y2="56" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
-          <line x1="306" y1="56" x2="336" y2="56" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
-          <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#52514e"/></marker></defs>
-          <rect x="60" y="118" width="196" height="46" rx="8" fill="#fff" stroke="#d6d5d0"/>
-          <text x="158" y="138" text-anchor="middle" fill="#0b0b0b" font-weight="600">Регламентные переносы — исключены</text>
-          <text x="158" y="152" text-anchor="middle" fill="#7a786f">закрытие 23→20, распределение 25</text>
-          <rect x="300" y="118" width="196" height="46" rx="8" fill="#fff" stroke="#d6d5d0"/>
-          <text x="398" y="138" text-anchor="middle" fill="#0b0b0b" font-weight="600">Контроль: Σ строк = источникам</text>
-          <text x="398" y="152" text-anchor="middle" fill="#009a3e" font-weight="700">расхождение 0,00 ₽</text>
-          <line x1="158" y1="118" x2="236" y2="84" stroke="#c9c8c2" stroke-width="1.4"/>
-          <line x1="398" y1="118" x2="405" y2="84" stroke="#c9c8c2" stroke-width="1.4"/>
-        </g>
-      </svg>
+      (3) БДР факт — затратная часть + ФОТ в месячной форме. Перераспределённые суммы сверяются:
+      расхождение — ноль, непопавшее честно в лист «Требует решения».</p>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 10px;font-size:12px">
+        <span style="background:#eef4fc;border:1px solid #2a78d6;border-radius:8px;padding:4px 10px">Выгрузка 1С<br><span style="color:#7a786f;font-size:11px">журнал проводок</span></span><span style="color:#7a786f">→</span>
+        <span style="background:#e8f9f1;border:1px solid #00a86b;border-radius:8px;padding:4px 10px">ФОТ из табелей<br><span style="color:#7a786f;font-size:11px">ЦФО × объекты</span></span><span style="color:#7a786f">→</span>
+        <span style="background:#fdf2ec;border:1px solid #f05a28;border-radius:8px;padding:4px 10px">БДР факт<br><span style="color:#7a786f;font-size:11px">затраты + ФОТ</span></span>
+      </div>
+      <p style="color:#009a3e;font-weight:600;font-size:12px">Контроль: Σ строк = источникам — расхождение 0,00 ₽</p>
       <p><a href="demo-output/bdr-verification-report.md">Журнал проверки БДР →</a></p>
-    </a>
-    <a class="card" href="dashboard/index.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
-      <h2>4. Дашборд руководителя <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть дашборд →</span></h2>
+      <p style="color:#52514e"><b>На странице</b> — кликабельные шаги цикла, затраты по ЦФО и матрица 17×7 с проводками каждой статьи.</p>
+    </div>
+    <div class="card">
+      <h2>4. Дашборд руководителя <a class="go" href="dashboard/index.html" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть дашборд →</a></h2>
       <p>Деньги за день и бюджет года на одном экране; демо-версия на вымышленных данных открывается в браузере.</p>
       <img src="screens/05-dashboard.png" alt="Демо-дашборд">
-    </a>
-    <a class="card" href="pages/plan.html" style="text-decoration:none;color:inherit;transition:border-color .15s">
-      <h2>5. План года по драйверам <span class="badge" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</span></h2>
+    </div>
+    <div class="card">
+      <h2>5. План года по драйверам <a class="go" href="pages/plan.html" style="background:#eef4fc;border-color:#2a78d6;color:#205089">открыть страницу →</a></h2>
       <p>Драйвер-бюджет: пульт параметров (фонд маш.-часов, ставка, цена ДТ, численность, ФОТ), из которого
       выручка, затраты и валовая пересчитываются в строки бюджета. <b>На странице — интерактивный пульт:
       двигайте драйверы, бюджет пересобирается мгновенно</b>. Развитие после отчётности: планирование, а не только факт.</p>
-    </a>
+    </div>
+  </div>
   <div class="card" style="margin-top:14px">
     <h2>Как запустить у себя</h2>
     <p>Windows + Node.js + Excel. Полный пошаговый разбор на синтетических данных —
