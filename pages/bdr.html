@@ -153,7 +153,7 @@ function renderMatrix() {
     if (ai === openRow) {
       const list = D.bdr.spread.filter(s => s.article === a.article);
       tbody.insertAdjacentHTML('beforeend', '<tr><td colspan="9" style="background:#fcfcfa"><b>Проводки статьи «' + a.article + '» (' + list.length + '):</b><br>' +
-        list.map(s => s.dt + ' · ' + s.doc + ' · Дт ' + s.dt + ' ' + s.sub + ' ← Кт ' + s.kt + ' · ' + s.agent + ' · <b>' + f2(s.amount) + '</b> → ЦФО ' + s.cfo).join('<br>') + '</td></tr>');
+        list.map(s => (s.date || '') + ' · ' + s.doc + ' · Дт ' + s.dt + ' ' + s.sub + ' ← Кт ' + s.kt + ' · ' + s.agent + ' · <b>' + f2(s.amount) + '</b> → ЦФО ' + s.cfo).join('<br>') + '</td></tr>');
     }
   });
 }
