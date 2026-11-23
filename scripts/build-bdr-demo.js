@@ -58,10 +58,10 @@ const journal = [];
 for (let i = 2; i < aoa.length; i++) {
   const r = aoa[i];
   if (!r || !norm(r[2])) continue;
-  journal.push({ dt: norm(r[2]), obj: norm(r[3]), dep: norm(r[4]), kt: norm(r[5]), ctr: norm(r[6]), sum: V(r[7]), art: norm(r[8]) });
+  journal.push({ dt: norm(r[0]), doc: norm(r[1]), acc: norm(r[2]), obj: norm(r[3]), dep: norm(r[4]), kt: norm(r[5]), ctr: norm(r[6]), sum: V(r[7]), art: norm(r[8]) });
 }
 // фильтр затрагивающих-затраты и регламентных
-const isCost = r => ['20.01', '23.01', '23.02', '25', '26'].includes(r.dt);
+const isCost = r => ['20.01', '23.01', '23.02', '25', '26'].includes(r.acc);
 const isReg = r => /^(23|25)\./.test(r.kt) || r.kt === '25';
 const costRows = journal.filter(isCost);
 const regRows = costRows.filter(isReg);
@@ -131,7 +131,7 @@ for (const r of work) {
   const cfoHit = CFO_MAP.find(([re]) => re.test(r.dep));
   const artHit = ARTICLE_MAP.find(([re]) => re.test(r.kt) || re.test(r.art));
   if (!cfoHit || !artHit) continue;
-  XLSX.utils.sheet_add_aoa(wsDet, [[r.dt, r.doc, r.dt, r.obj, r.dep, r.kt, r.ctr, r.sum, artHit[1], cfoHit[1]]], { origin: rd });
+  XLSX.utils.sheet_add_aoa(wsDet, [[r.dt, r.doc, r.acc, r.obj, r.dep, r.kt, r.ctr, r.sum, artHit[1], cfoHit[1]]], { origin: rd });
   rd++;
 }
 wsDet['!cols'] = [{ wch: 10 }, { wch: 26 }, { wch: 10 }, { wch: 24 }, { wch: 22 }, { wch: 8 }, { wch: 20 }, { wch: 12 }, { wch: 38 }, { wch: 8 }];
